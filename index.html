@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #box{
+            width: 100px;
+            height: 100px;
+            background-color: #ffa31b;
+            position:absolute;
+            top: 100px;
+            left: 100px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+</head>
+<body>
+    <h2>联网拖拽</h2>
+    <div id="box"></div>
+    <script>
+        var box = document.getElementById('box');
+        var socket = io('http://localhost:3000');
+        box.onmousedown = function(evt){
+            var e = evt || window.event;
+            var x = e.clientX - box.offsetLeft;
+            var y = e.clientY - box.offsetTop;
+            // console.log(x,y);
+            //注册鼠标移动事件，为了防止移动过程中鼠标离开box，把事件注册在它的父级上，比如doucument
+            document.onmousemove = function(evt){
+                var e = evt || window.event;
+                box.style.left = e.clientX - x + 'px';
+                box.style.top = e.clientY - y + 'px';
+                socket.emit('move',{x:box.offsetLeft,y:box.offsetTop});
+            }
+        };
+        document.onmouseup = function(evt){
+            var e = evt || window.event;
+            document.onmousemove = null;
+        };
+        socket.on('location',function(data){
+            console.log(data);
+            box.style.left = data.x + 'px';
+            box.style.top = data.y + 'px';
+
+        })
+
+    </script>
+</body>
+</html>
